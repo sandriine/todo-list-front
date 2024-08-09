@@ -1,11 +1,15 @@
 import './main.css';
-import { TodoList } from './pages/TodoLists.tsx';
+import { TodoLists } from './pages/TodoLists.tsx';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient()
 
 export function Main() {
-
   return (
     <>
-      <TodoList />
+      <QueryClientProvider client={queryClient}>
+      <TodoLists />
+        </QueryClientProvider>
     </>
   );
 }
