@@ -43,7 +43,7 @@ export function TodoLists() {
 
 
 const fetchTodoList = async () => {
-  const response = await fetch('/todos')
+  const response = await fetch('http://localhost:3000/todos')
   if (!response.ok) {
     throw new Error('Network response was not ok')
   }
