@@ -1,9 +1,14 @@
+const cors = require('@fastify/cors');
 const fastify = require('fastify')({
   logger: true
 })
 
+fastify.register(cors, {
+  origin: '*',
+})
+
 fastify.get('/todos', function (request, reply) {
-  reply.send({ hello: 'world' })
+  reply.send([{ id: '1', title: 'Hello'}])
 })
 
 // Run the server!

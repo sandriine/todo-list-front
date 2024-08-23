@@ -1,4 +1,4 @@
-import { Table } from "antd";
+import { Table } from 'antd';
 import { useQuery } from '@tanstack/react-query';
 
 
@@ -7,8 +7,6 @@ export interface TodoList {
   title: string;
 }
 
-
-
 export function TodoLists() {
   const { isPending, isError, data, error } = useQuery({
     queryKey: ['todos'],
@@ -16,6 +14,11 @@ export function TodoLists() {
   });
 
   const columns = [
+    {
+      title: 'ID',
+      dataIndex: 'id',
+      key: 'id',
+    },
     {
       title: 'Title',
       dataIndex: 'title',
@@ -28,19 +31,24 @@ export function TodoLists() {
   }
 
   if (isError) {
-    return <span>Error: {error.message}</span>
+    return <span>Error: { error.message }</span>
   }
 
-  const dataSource = data as TodoList[];
+  function mapToDataSource() {
+    return data.map((item: TodoList) => (
+      {
+        ...item, key: item.id
+      }
+    ));
+  }
 
   return (
     <div>
       <h1>TodoList</h1>
-      <Table dataSource={dataSource} columns={columns} />
+      <Table dataSource={ mapToDataSource() } columns={ columns }/>
     </div>
   )
 }
-
 
 const fetchTodoList = async () => {
   const response = await fetch('http://localhost:3000/todos')
