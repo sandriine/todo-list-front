@@ -65,48 +65,6 @@ export const routeWithBody = (
     reply.status(options?.statusCode || 200).send();  // Send response with appropriate status code
 };
 
-// Generic DELETE route handler
-/*export const deleteRoute = (dataFilePath: string, idKey: string) => async (request: FastifyRequest, reply: FastifyReply) => {
-    const data = JSON.parse(fs.readFileSync(path.resolve(dataFilePath), 'utf8'));
-    // @ts-ignore
-    const updatedData = data.filter((item: any) => item[idKey] !== request.params.id);
-    fs.writeFileSync(path.resolve(dataFilePath), JSON.stringify(updatedData, null, 2));
-    reply.status(204).send();  // Send a 204 No Content status with no response body
-};*/
-
-/*export const deleteRoute = (dataFilePath: string, idKey: string) => async (request: FastifyRequest, reply: FastifyReply) => {
-    const data = JSON.parse(fs.readFileSync(path.resolve(dataFilePath), 'utf8'));
-    console.log('Data before deletion:', data);
-
-    // @ts-ignore
-    const idToDelete = parseInt(request.params.id, 10);
-    console.log('ID to delete:', idToDelete);
-
-    const updatedData = data.filter((item: any) => item[idKey] !== idToDelete);
-    console.log('Data after deletion:', updatedData);
-
-    // Write the updated data back to the file
-    fs.writeFileSync(path.resolve(dataFilePath), JSON.stringify(updatedData, null, 2));
-
-    // Respond with 204 No Content
-    reply.status(204).send();
-};*/
-
-// export const deleteRoute = (dataFilePath: string, idKey: string) => async (request: FastifyRequest, reply: FastifyReply) => {
-//     const data = JSON.parse(fs.readFileSync(path.resolve(dataFilePath), 'utf8'));
-//
-//     // @ts-ignore
-//     const idToDelete = request.params.id; // Keep the ID as a string
-//     const updatedData = data.filter((item: any) => item[idKey] !== idToDelete);
-//
-//     // Write the updated data back to the file
-//     fs.writeFileSync(path.resolve(dataFilePath), JSON.stringify(updatedData, null, 2));
-//
-//     // Respond with 204 No Content
-//     reply.status(204).send();
-// };
-
-
 // Generic DELETE route handler that handles both numeric and string IDs
 export const deleteRoute = (dataFilePath: string, idKey: string) => async (request: FastifyRequest, reply: FastifyReply) => {
     const data = JSON.parse(fs.readFileSync(path.resolve(dataFilePath), 'utf8'));

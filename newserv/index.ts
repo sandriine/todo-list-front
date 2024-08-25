@@ -30,12 +30,6 @@ fastify.listen({port: 3000, host: '0.0.0.0'}, (err, address) => {
     }
     console.log(`\x1b[32m[INFO]\x1b[0m Server started on ${address}`);
 });
-    // try {
-    //     fastify.log.info(`Server listening on http://localhost:3000`);
-    // } catch (err) {
-    //     fastify.log.error(err);
-    //     process.exit(1);
-    // }
 };
 
 start()
