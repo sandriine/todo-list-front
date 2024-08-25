@@ -9,6 +9,12 @@ export const registerDynamicRoutes = (fastify: FastifyInstance) => {
     const files = fs.readdirSync(dataDir);
 
     files.forEach((file) => {
+        // Skip non-JSON files
+        if (path.extname(file) !== '.json') {
+            fastify.log.info(`Skipping non-JSON file: ${file}`);
+            return;
+        }
+
         const routeName = path.basename(file, '.json');
         const routePath = `/${routeName}`;
         const dataFilePath = path.join(dataDir, file);

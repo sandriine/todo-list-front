@@ -6,6 +6,12 @@ const dataDir = path.join(__dirname, config.dataDir);
 const files = fs.readdirSync(dataDir);
 
 files.forEach((file) => {
+    // Skip non-JSON files, such as README_old.md
+    if (path.extname(file) !== '.json') {
+        console.log(`[INFO] Skipping non-JSON file: ${file}`);
+        return;
+    }
+
     if (!config.routeConfig[file]) {
         console.log(`\x1b[33m[INFO]\x1b[0m Found new file: ${file}`);
 
