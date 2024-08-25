@@ -13,7 +13,7 @@ export const getRoute = (dataFilePath: string) => async (request: FastifyRequest
 
     // Check for error simulation fragments in the URL
     // @ts-ignore
-    const handling = request.query.errors as string;
+    const handling = request.query.errorTypes as string;
     if (handling) {
         switch (handling.toLowerCase()) {
             case 'notfound':
@@ -24,6 +24,12 @@ export const getRoute = (dataFilePath: string) => async (request: FastifyRequest
                 return;
             case 'unauthorized':
                 reply.status(401).send({ error: 'Unauthorized' });
+                return;
+            case 'forbidden':
+                reply.status(403).send({ error: 'Forbidden' });
+                return;
+            default:
+                reply.status(400).send({ error: 'Bad Request' });
                 return;
             // Add more cases as needed
         }

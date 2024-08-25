@@ -508,7 +508,7 @@ import { FastifyInstance } from 'fastify';
 import fs from 'fs';
 import path from 'path';
 // @ts-ignore
-import config from '../mockserver.config.js';
+import config from '../config/mockserver.config.js';
 
 // interface RouteConfig {
 //     routes: string[];
@@ -567,7 +567,12 @@ export const registerDynamicRoutes = (fastify: FastifyInstance) => {
         const dataFilePath = path.join(dataDir, file);
 
         // Get configuration from the external file
-        const routeConfig: RouteConfig = config.routeConfig[file] || { routes: ['GET'], hasSpecificRoute: true, parent: null, parentKey: '' };
+        const routeConfig: RouteConfig = config.routeConfig[file] || { routes: ['GET'], hasSpecificRoute: false, parent: null, parentKey: '' };
+
+        if (!routeConfig) {
+            console.error(`No routeConfig found for ${file}`);
+            return;
+        }
 
         if (!isRouteRegistered(fastify, routePath)) {
             registerRoutes(fastify, routeConfig.routes, routePath, dataFilePath, routeConfig);
@@ -710,6 +715,9 @@ const simulateError = (request: any, reply: any): boolean => {
                 break;
             case '401':
                 reply.status(401).send({ error: 'Unauthorized' });
+                break;
+            case '403':
+                reply.status(403).send({ error: 'Forbidden' });
                 break;
             default:
                 reply.status(400).send({ error: 'Bad Request' });
