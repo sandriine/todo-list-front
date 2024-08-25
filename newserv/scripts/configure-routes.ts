@@ -17,21 +17,25 @@ files.forEach((file) => {
             hasSpecificRoute: false,
         };
 
-        const configString = `module.exports = {
-            dataDir: '${config.dataDir}', // Directory where JSON files are stored
-            routeConfig: {
-                ${Object.entries(config.routeConfig).map(([key, value]) => `
-               '${key}': {
-                   routes: [${value.routes.map(route => `'${route}'`).join(', ')}],
-                   parent: ${value.parent ? `'${value.parent}'` : 'null'},
-                   parentKey: ${value.parentKey ? `'${value.parentKey}'` : 'null'},
-                   hasSpecificRoute: ${value.hasSpecificRoute}
-               }`).join(',')}
-            }
-        };`;
+        const configString = `import {MockServerConfig} from "./types/interfaces";
+    
+const config: MockServerConfig = {
+    dataDir: '${config.dataDir}', // Directory where JSON files are stored
+    routeConfig: {
+        ${Object.entries(config.routeConfig).map(([key, value]) => `
+        '${key}': {
+            routes: [${value.routes.map(route => `'${route}'`).join(', ')}],
+            parent: ${value.parent ? `'${value.parent}'` : 'null'},
+            parentKey: ${value.parentKey ? `'${value.parentKey}'` : 'null'},
+            hasSpecificRoute: ${value.hasSpecificRoute}
+        }`).join(',')}
+    }
+};
+
+export default config;`;
 
 
-        fs.writeFileSync('./mockserver.config.ts', configString, 'utf-8');
+        fs.writeFileSync(path.join(__dirname, '../config/mockserver.config.ts'), configString, 'utf-8');
         console.log(`\x1b[32m[INFO]\x1b[0m Added default GET route configuration for ${file}`);
     }
 });

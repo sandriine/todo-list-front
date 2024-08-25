@@ -6,7 +6,8 @@
   },
   {
     "id": "2",
-    "title": "Take deep breath"
+    "title": "Take deep breath",
+    "completed": true
   },
   {
     "title": "Improvement",
