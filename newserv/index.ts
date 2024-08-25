@@ -5,7 +5,7 @@ import { registerPostRoutes } from './api/post.controller';
 import { registerPutRoutes } from './api/put.controller';
 import { registerDeleteRoutes } from './api/delete.controller';
 import { registerPatchRoutes } from './api/patch.controller';
-import {execSync} from "node:child_process";
+import configureRoutesPlugin from "./plugins/configureRoutesPlugin";
 
 const start = async () => {
     const fastify = createServer();
@@ -17,9 +17,7 @@ const start = async () => {
     registerDeleteRoutes(fastify);
     registerPatchRoutes(fastify);
 
-    // Run the configure-routes.ts script
-    console.log('\x1b[34m[INFO]\x1b[0m Running route configuration script...');
-    execSync('npx ts-node ./scripts/configure-routes.ts', { stdio: 'inherit' });
+    fastify.register(configureRoutesPlugin);
 
     registerDynamicRoutes(fastify);
 

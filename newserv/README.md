@@ -34,7 +34,8 @@ newserv/
 ├── config/             # Configuration files and types
 ├── data/               # JSON files used as mock data
 ├── routes/             # Dynamic route registration logic
-├── scripts/            # Utility scripts, like configure-routes.ts
+├── plugins/            # Custom Fastify plugins
+│   └── configureRoutesPlugin.ts  # Plugin for configuring routes dynamically
 ├── utils/              # Utility functions and error handling
 ├── index.ts            # Main entry point for the server
 └── tsconfig.json       # TypeScript configuration

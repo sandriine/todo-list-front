@@ -25,4 +25,5 @@ const config: MockServerConfig = {
     }
 };
 
+// @ts-ignore
 export default config;
