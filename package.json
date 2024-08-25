@@ -6,8 +6,7 @@
     "start": "farm start",
     "build": "farm build",
     "preview": "farm preview",
-    "clean": "farm clean",
-    "configure-routes": " node configure-routes.js"
+    "clean": "farm clean"
   },
   "dependencies": {
     "@fastify/cors": "^9.0.1",
