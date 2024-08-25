@@ -1,4 +1,6 @@
-module.exports = {
+import {MockServerConfig} from "./types/interfaces";
+
+const config: MockServerConfig = {
     dataDir: '../data', // Directory where JSON files are stored
     routeConfig: {
 
@@ -22,3 +24,5 @@ module.exports = {
        }
     }
 };
+
+export default config;

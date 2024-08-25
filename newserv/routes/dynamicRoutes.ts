@@ -1,8 +1,8 @@
 import { FastifyInstance } from 'fastify';
 import fs from 'fs';
 import path from 'path';
-// @ts-ignore
-import config from '../config/mockserver.config.js';
+import config from '../config/mockserver.config';
+import {RouteConfig} from "../config/types/interfaces";
 
 export const registerDynamicRoutes = (fastify: FastifyInstance) => {
     const dataDir = path.join(__dirname, config.dataDir); // Use the configured data directory
@@ -129,13 +129,6 @@ const registerRoutes = (fastify: FastifyInstance, routes: string[], routePath: s
         }
     });
 };
-
-interface RouteConfig {
-    routes: string[];
-    parent: string | null;
-    parentKey: string;
-    hasSpecificRoute: boolean;
-}
 
 const registerNestedRoutes = (
     fastify: FastifyInstance,

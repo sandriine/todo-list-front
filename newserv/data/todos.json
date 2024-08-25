@@ -6,12 +6,11 @@
   },
   {
     "id": "2",
-    "title": "Take deep breath",
-    "completed": true
+    "title": "Take deep breath"
   },
   {
-    "id": 3,
     "title": "Improvement",
-    "completed": false
+    "completed": false,
+    "id": 3
   }
 ]

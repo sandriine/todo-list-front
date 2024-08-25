@@ -17,9 +17,9 @@ const start = async () => {
     registerDeleteRoutes(fastify);
     registerPatchRoutes(fastify);
 
-    // Run the configure-routes.js script
+    // Run the configure-routes.ts script
     console.log('\x1b[34m[INFO]\x1b[0m Running route configuration script...');
-    execSync('node ./scripts/configure-routes.js', { stdio: 'inherit' });
+    execSync('npx ts-node ./scripts/configure-routes.ts', { stdio: 'inherit' });
 
     registerDynamicRoutes(fastify);
 
