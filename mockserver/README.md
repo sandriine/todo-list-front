@@ -18,7 +18,7 @@ This mock server is designed to provide a flexible and extensible environment fo
 ### Installation
 ```bash
 git clone <repository-url>
-cd newserv
+cd mockserver
 npm install
 ```
 
@@ -29,7 +29,7 @@ npx ts-node index.ts
 
 ### Project Structure
 ```
-newserv/
+mockserver/
 ├── api/                # API controllers for handling HTTP requests
 ├── config/             # Configuration files and types
 ├── data/               # JSON files used as mock data
