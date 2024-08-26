@@ -20,7 +20,7 @@ export const registerDynamicRoutes = (fastify: FastifyInstance) => {
         const dataFilePath = path.join(dataDir, file);
 
         // Get configuration from the external file
-        const routeConfig: RouteConfig = config.routeConfig[file] || { routes: ['GET'], hasSpecificRoute: false, parent: null, parentKey: '' };
+        const routeConfig: RouteConfig = config.routeConfig[file] || { routes: ['GET'], parents: null, customParentKeys: null, hasSpecificRoute: false };
 
         if (!routeConfig) {
             console.error(`No routeConfig found for ${file}`);
@@ -31,8 +31,8 @@ export const registerDynamicRoutes = (fastify: FastifyInstance) => {
             registerRoutes(fastify, routeConfig.routes, routePath, dataFilePath, routeConfig);
         }
 
-        if (routeConfig.parent) {
-            const nestedRoutePath = `/${routeConfig.parent}/:${routeConfig.parentKey}/${routeName}`;
+        if (routeConfig.parents) {
+            const nestedRoutePath = `/${routeConfig.parents}/:${routeConfig.customParentKeys}/${routeName}`;
             if (!isRouteRegistered(fastify, nestedRoutePath)) {
                 registerNestedRoutes(fastify, routeConfig, routeName, dataFilePath);
             }
@@ -142,8 +142,8 @@ const registerNestedRoutes = (
     routeName: string,
     dataFilePath: string
 ) => {
-    const parentRouteName = config.parent;
-    const parentKey = config.parentKey;
+    const parentRouteName = config.parents;
+    const parentKey = config.customParentKeys;
     const nestedRoutePath = `/${parentRouteName}/:${parentKey}/${routeName}`;
 
     registerRoutes(fastify, config.routes, nestedRoutePath, dataFilePath, config);

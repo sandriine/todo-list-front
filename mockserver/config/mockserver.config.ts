@@ -6,20 +6,20 @@ const config: MockServerConfig = {
         
         'products.json': {
             routes: ['GET'],
-            parent: null,
-            parentKey: null,
+            parents: null,
+            customParentKeys: null,
             hasSpecificRoute: false
         },
         'todo_items.json': {
             routes: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-            parent: 'todos',
-            parentKey: 'todoId',
+            parents: ['todos'],
+            customParentKeys: null,
             hasSpecificRoute: true
         },
         'todos.json': {
             routes: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-            parent: null,
-            parentKey: null,
+            parents: null,
+            customParentKeys: null,
             hasSpecificRoute: true
         }
     }
