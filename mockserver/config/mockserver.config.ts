@@ -4,11 +4,11 @@ const config: MockServerConfig = {
     dataDir: '../data', // Directory where JSON files are stored
     routeConfig: {
         
-        'todos.json': {
-            routes: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+        'products.json': {
+            routes: ['GET'],
             parent: null,
             parentKey: null,
-            hasSpecificRoute: true
+            hasSpecificRoute: false
         },
         'todo_items.json': {
             routes: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
@@ -16,14 +16,13 @@ const config: MockServerConfig = {
             parentKey: 'todoId',
             hasSpecificRoute: true
         },
-        'products.json': {
-            routes: ['GET'],
+        'todos.json': {
+            routes: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
             parent: null,
             parentKey: null,
-            hasSpecificRoute: false
+            hasSpecificRoute: true
         }
     }
 };
 
-// @ts-ignore
 export default config;

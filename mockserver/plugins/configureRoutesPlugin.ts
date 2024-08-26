@@ -5,7 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import config from '../config/mockserver.config';
 
-const configureRoutesPlugin = async (fastify: FastifyInstance, options: FastifyPluginOptions) => {
+const configureRoutesPlugin = async (fastify: FastifyInstance, _: FastifyPluginOptions) => {
     fastify.log.info('[INFO] Running route configuration script...');
 
     const dataDir = path.join(__dirname, config.dataDir);
@@ -29,12 +29,20 @@ const configureRoutesPlugin = async (fastify: FastifyInstance, options: FastifyP
                 hasSpecificRoute: false,
             };
 
+            // Sort the routeConfig by file name
+            const sortedRouteConfig = Object.keys(config.routeConfig)
+                .sort()
+                .reduce((acc, key) => {
+                    acc[key] = config.routeConfig[key];
+                    return acc;
+                }, {} as typeof config.routeConfig);
+
             const configString = `import {MockServerConfig} from "./types/interfaces";
     
 const config: MockServerConfig = {
     dataDir: '${config.dataDir}', // Directory where JSON files are stored
     routeConfig: {
-        ${Object.entries(config.routeConfig).map(([key, value]) => `
+        ${Object.entries(sortedRouteConfig).map(([key, value]) => `
         '${key}': {
             routes: [${value.routes.map(route => `'${route}'`).join(', ')}],
             parent: ${value.parent ? `'${value.parent}'` : 'null'},
