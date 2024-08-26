@@ -24,8 +24,8 @@ const configureRoutesPlugin = async (fastify: FastifyInstance, _: FastifyPluginO
             // Default configuration: only GET method without specific routes
             config.routeConfig[file] = {
                 routes: ['GET'],
-                parents: null,
-                customParentKeys: null,
+                parents: [],
+                customParentKeys: {},
                 hasSpecificRoute: false,
             };
 
@@ -45,8 +45,8 @@ const config: MockServerConfig = {
         ${Object.entries(sortedRouteConfig).map(([key, value]) => `
         '${key}': {
             routes: [${value.routes.map(route => `'${route}'`).join(', ')}],
-            parent: ${value.parents ? `'${value.parents}'` : 'null'},
-            parentKey: ${value.customParentKeys ? `'${value.customParentKeys}'` : 'null'},
+            parents: ${value.parents ? `'${value.parents}'` : '[]'},
+            customParentKeys: ${value.customParentKeys ? `'${value.customParentKeys}'` : '{}'},
             hasSpecificRoute: ${value.hasSpecificRoute}
         }`).join(',')}
     }

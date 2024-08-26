@@ -1,7 +1,7 @@
 export interface RouteConfig {
     routes: string[];
-    parents: string[] | null;
-    customParentKeys: { [key: string]: string } | null;
+    parents: string[];
+    customParentKeys: { [key: string]: string };
     hasSpecificRoute: boolean;
 }
 

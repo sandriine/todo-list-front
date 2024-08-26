@@ -20,7 +20,7 @@ export const registerDynamicRoutes = (fastify: FastifyInstance) => {
         const dataFilePath = path.join(dataDir, file);
 
         // Get configuration from the external file
-        const routeConfig: RouteConfig = config.routeConfig[file] || { routes: ['GET'], parents: null, customParentKeys: null, hasSpecificRoute: false };
+        const routeConfig: RouteConfig = config.routeConfig[file] || { routes: ['GET'], parents: [], customParentKeys: {}, hasSpecificRoute: false };
 
         if (!routeConfig) {
             console.error(`No routeConfig found for ${file}`);
@@ -32,7 +32,7 @@ export const registerDynamicRoutes = (fastify: FastifyInstance) => {
         }
 
         if (routeConfig.parents) {
-            const nestedRoutePath = generateNestedRoutePath(routeConfig.parents!!, routeName, routeConfig.customParentKeys);
+            const nestedRoutePath = generateNestedRoutePath(routeConfig.parents, routeName, routeConfig.customParentKeys);
             if (!isRouteRegistered(fastify, nestedRoutePath)) {
                 registerNestedRoutes(fastify, routeConfig, routeName, dataFilePath);
             }
@@ -40,9 +40,10 @@ export const registerDynamicRoutes = (fastify: FastifyInstance) => {
     });
 };
 
-const generateNestedRoutePath = (parents: string[], routeName: string, customParentKeys: any) => {
-    const parentPaths = parents.map(parent => `:${customParentKeys[parent] || `${parent}Id`}`).join('/');
-    return `/${parentPaths}/${routeName}`;
+const generateNestedRoutePath = (parents: string[], routeName: string, customParentKeys: { [key: string]: string }) => {
+    const parentPaths = parents.map(parent => `:${customParentKeys[parent] || `${parent}Id`}`).filter(Boolean).join('/');
+    //return `/${parentPaths}/${routeName}`;
+    return parentPaths ? `/${parentPaths}/${routeName}` : `/${routeName}`;
 };
 
 const isRouteRegistered = (fastify: FastifyInstance, routePath: string): boolean => {
@@ -142,7 +143,7 @@ const registerNestedRoutes = (
     routeName: string,
     dataFilePath: string
 ) => {
-    const nestedRoutePath = generateNestedRoutePath(config.parents!!, routeName, config.customParentKeys);
+    const nestedRoutePath = generateNestedRoutePath(config.parents, routeName, config.customParentKeys);
     registerRoutes(fastify, config.routes, nestedRoutePath, dataFilePath, config);
 };
 
