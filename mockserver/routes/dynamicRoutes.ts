@@ -1,15 +1,14 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import { FastifyInstance } from 'fastify';
 import fs from 'fs';
 import path from 'path';
 import config from '../config/mockserver.config';
 import { RouteConfig } from "../config/types/interfaces";
 
 export const registerDynamicRoutes = (fastify: FastifyInstance) => {
-    const dataDir = path.join(__dirname, config.dataDir); // Use the configured data directory
+    const dataDir = path.join(__dirname, config.dataDir);
     const files = fs.readdirSync(dataDir);
 
     files.forEach((file) => {
-        // Skip non-JSON files
         if (path.extname(file) !== '.json') {
             fastify.log.info(`Skipping non-JSON file: ${file}`);
             return;
@@ -19,31 +18,29 @@ export const registerDynamicRoutes = (fastify: FastifyInstance) => {
         const routePath = `/${routeName}`;
         const dataFilePath = path.join(dataDir, file);
 
-        // Get configuration from the external file
-        const routeConfig: RouteConfig = config.routeConfig[file] || { routes: ['GET'], parents: [], customParentKeys: {}, hasSpecificRoute: false };
+        const routeConfig: RouteConfig = config.routeConfig[file] || {
+            routes: ['GET'],
+            parents: [],
+            customParentKeys: {},
+            hasSpecificRoute: false
+        };
 
         if (!routeConfig) {
             console.error(`No routeConfig found for ${file}`);
             return;
         }
 
-        if (!isRouteRegistered(fastify, routePath)) {
-            registerRoutes(fastify, routeConfig.routes, routePath, dataFilePath, routeConfig);
-        }
-
-        if (routeConfig.parents) {
+        if (routeConfig.parents.length > 0) {
             const nestedRoutePath = generateNestedRoutePath(routeConfig.parents, routeName, routeConfig.customParentKeys);
             if (!isRouteRegistered(fastify, nestedRoutePath)) {
-                registerNestedRoutes(fastify, routeConfig, routeName, dataFilePath);
+                registerNestedRoutes(fastify, routeConfig, nestedRoutePath, dataFilePath);
+            }
+        } else {
+            if (!isRouteRegistered(fastify, routePath)) {
+                registerRoutes(fastify, routeConfig.routes, routePath, dataFilePath, routeConfig);
             }
         }
     });
-};
-
-const generateNestedRoutePath = (parents: string[], routeName: string, customParentKeys: { [key: string]: string }) => {
-    const parentPaths = parents.map(parent => `:${customParentKeys[parent] || `${parent}Id`}`).filter(Boolean).join('/');
-    //return `/${parentPaths}/${routeName}`;
-    return parentPaths ? `/${parentPaths}/${routeName}` : `/${routeName}`;
 };
 
 const isRouteRegistered = (fastify: FastifyInstance, routePath: string): boolean => {
@@ -51,11 +48,16 @@ const isRouteRegistered = (fastify: FastifyInstance, routePath: string): boolean
     return routesList.includes(routePath);
 };
 
-const registerRoutes = (fastify: FastifyInstance, routes: string[], routePath: string, dataFilePath: string, config?: RouteConfig) => {
+const generateNestedRoutePath = (parents: string[], routeName: string, customParentKeys: { [key: string]: string }): string => {
+    const parentPaths = parents.map(parent => `:${customParentKeys[parent] || `${parent}Id`}`).join('/');
+    return `/${parentPaths}/${routeName}`;
+};
+
+const registerRoutes = (fastify: FastifyInstance, routes: string[], routePath: string, dataFilePath: string, config: RouteConfig) => {
     routes.forEach(route => {
         switch (route) {
             case 'GET':
-                fastify.get(routePath, async (request: FastifyRequest, reply: FastifyReply) => {
+                fastify.get(routePath, async (request, reply) => {
                     if (simulateError(request, reply)) return;
                     const data = readDataFromFile(dataFilePath);
                     const filteredData = filterDataByQueryParams(data, request.query);
@@ -63,32 +65,37 @@ const registerRoutes = (fastify: FastifyInstance, routes: string[], routePath: s
                 });
                 fastify.log.info(`Registered GET route: ${routePath}`);
 
-                if (config?.hasSpecificRoute) {
-                    fastify.get(`${routePath}/:id`, async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+                if (config.hasSpecificRoute) {
+                    fastify.get(`${routePath}/:id`, async (request, reply) => {
                         if (simulateError(request, reply)) return;
                         const data = readDataFromFile(dataFilePath);
+                        // @ts-ignore
                         const item = findItemById(data, request.params.id);
                         reply.status(item ? 200 : 404).send(item || { error: 'Item not found' });
                     });
                     fastify.log.info(`Registered GET route: ${routePath}/:id`);
                 }
                 break;
+
             case 'POST':
                 fastify.post(routePath, async (request, reply) => {
                     if (simulateError(request, reply)) return;
                     const data = readDataFromFile(dataFilePath);
+                    const newItem = request.body;
                     // @ts-ignore
-                    const newItem = { id: data.length + 1, ...request.body };
+                    newItem.id = data.length + 1;
                     data.push(newItem);
                     fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2));
                     reply.status(201).send(newItem);
                 });
                 fastify.log.info(`Registered POST route: ${routePath}`);
                 break;
+
             case 'PUT':
-                fastify.put(`${routePath}/:id`, async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+                fastify.put(`${routePath}/:id`, async (request, reply) => {
                     if (simulateError(request, reply)) return;
                     const data = readDataFromFile(dataFilePath);
+                    // @ts-ignore
                     const itemIndex = data.findIndex((item: any) => item.id == request.params.id);
                     if (itemIndex === -1) {
                         reply.status(404).send({ error: 'Item not found' });
@@ -102,10 +109,12 @@ const registerRoutes = (fastify: FastifyInstance, routes: string[], routePath: s
                 });
                 fastify.log.info(`Registered PUT route: ${routePath}/:id`);
                 break;
+
             case 'PATCH':
-                fastify.patch(`${routePath}/:id`, async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+                fastify.patch(`${routePath}/:id`, async (request, reply) => {
                     if (simulateError(request, reply)) return;
                     const data = readDataFromFile(dataFilePath);
+                    // @ts-ignore
                     const itemIndex = data.findIndex((item: any) => item.id == request.params.id);
                     if (itemIndex === -1) {
                         reply.status(404).send({ error: 'Item not found' });
@@ -118,10 +127,12 @@ const registerRoutes = (fastify: FastifyInstance, routes: string[], routePath: s
                 });
                 fastify.log.info(`Registered PATCH route: ${routePath}/:id`);
                 break;
+
             case 'DELETE':
-                fastify.delete(`${routePath}/:id`, async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+                fastify.delete(`${routePath}/:id`, async (request, reply) => {
                     if (simulateError(request, reply)) return;
                     const data = readDataFromFile(dataFilePath);
+                    // @ts-ignore
                     const itemIndex = data.findIndex((item: any) => item.id == request.params.id);
                     if (itemIndex === -1) {
                         reply.status(404).send({ error: 'Item not found' });
@@ -140,10 +151,9 @@ const registerRoutes = (fastify: FastifyInstance, routes: string[], routePath: s
 const registerNestedRoutes = (
     fastify: FastifyInstance,
     config: RouteConfig,
-    routeName: string,
+    nestedRoutePath: string,
     dataFilePath: string
 ) => {
-    const nestedRoutePath = generateNestedRoutePath(config.parents, routeName, config.customParentKeys);
     registerRoutes(fastify, config.routes, nestedRoutePath, dataFilePath, config);
 };
 
