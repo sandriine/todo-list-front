@@ -6,13 +6,13 @@ const config: MockServerConfig = {
         
         'categories.json': {
             routes: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-            parents: ["products"],
-            customParentKeys: {"products":"productId"},
+            parents: ['products'],
+            customParentKeys: {'products': 'productId'},
             hasSpecificRoute: true
         },
         'items.json': {
             routes: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-            parents: ["todos"],
+            parents: ['todos'],
             customParentKeys: {},
             hasSpecificRoute: true
         },
@@ -30,7 +30,7 @@ const config: MockServerConfig = {
         },
         'subtasks.json': {
             routes: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-            parents: ["todos","items"],
+            parents: ['todos', 'items'],
             customParentKeys: {},
             hasSpecificRoute: true
         },
