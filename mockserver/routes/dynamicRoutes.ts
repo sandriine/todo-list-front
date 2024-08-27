@@ -41,15 +41,6 @@ export const registerDynamicRoutes = (fastify: FastifyInstance) => {
         fastify.printRoutes();
     });
 };
-
-const getRouteConfig = (file: string): RouteConfig => {
-    const routeConfig = config.routeConfig[file];
-    if (!routeConfig) {
-        throw new Error(`No routeConfig found for ${file}`);
-    }
-    return routeConfig;
-};
-
 const isRouteRegistered = (fastify: FastifyInstance, routePath: string): boolean => {
     const routesList = fastify.printRoutes({ commonPrefix: false });
     return routesList.includes(routePath);
@@ -98,46 +89,66 @@ const registerRoutes = (fastify: FastifyInstance, routes: string[], routePath: s
                 });
                 fastify.log.info(`Registered POST route: ${routePath}`);
                 break;
-
             case 'PUT':
-            case 'PATCH':
-            case 'DELETE':
-                // @ts-ignore
-                fastify[route.toLowerCase()](`${routePath}/:id`, async (request, reply) => {
+                fastify.put(`${routePath}/:id`, async (request, reply) => {
                     if (simulateError(request, reply)) return;
                     const data = readDataFromFile(dataFilePath);
+                    // @ts-ignore
                     const itemIndex = data.findIndex((item: any) => item.id == request.params.id);
                     if (itemIndex === -1) {
                         reply.status(404).send({ error: 'Item not found' });
                         return;
                     }
-                    if (route === 'DELETE') {
-                        data.splice(itemIndex, 1);
-                        fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2));
-                        reply.status(204).send();
-                    } else {
-                        const updatedItem = { id: data[itemIndex].id, ...request.body };
-                        data[itemIndex] = updatedItem;
-                        fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2));
-                        reply.status(200).send(updatedItem);
-                    }
+                    // Replace the entire item with the new data
+                    // @ts-ignore
+                    const updatedItem = { id: data[itemIndex].id, ...request.body };
+                    data[itemIndex] = updatedItem;
+                    fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2));
+                    reply.status(200).send(updatedItem);
                 });
-                fastify.log.info(`Registered ${route} route: ${routePath}/:id`);
+                fastify.log.info(`Registered PUT route: ${routePath}/:id`);
+                break;
+
+            case 'PATCH':
+                fastify.patch(`${routePath}/:id`, async (request, reply) => {
+                    if (simulateError(request, reply)) return;
+                    const data = readDataFromFile(dataFilePath);
+                    // @ts-ignore
+                    const itemIndex = data.findIndex((item: any) => item.id == request.params.id);
+                    if (itemIndex === -1) {
+                        reply.status(404).send({ error: 'Item not found' });
+                        return;
+                    }
+                    // Update only specific fields
+                    // @ts-ignore
+                    const updatedItem = { ...data[itemIndex], ...request.body };
+                    data[itemIndex] = updatedItem;
+                    fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2));
+                    reply.status(200).send(updatedItem);
+                });
+                fastify.log.info(`Registered PATCH route: ${routePath}/:id`);
+                break;
+
+            case 'DELETE':
+                fastify.delete(`${routePath}/:id`, async (request, reply) => {
+                    if (simulateError(request, reply)) return;
+                    const data = readDataFromFile(dataFilePath);
+                    // @ts-ignore
+                    const itemIndex = data.findIndex((item: any) => item.id == request.params.id);
+                    if (itemIndex === -1) {
+                        reply.status(404).send({ error: 'Item not found' });
+                        return;
+                    }
+                    // Remove the item from the data array
+                    data.splice(itemIndex, 1);
+                    fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2));
+                    reply.status(204).send();
+                });
+                fastify.log.info(`Registered DELETE route: ${routePath}/:id`);
                 break;
         }
     });
 };
-
-
-const registerNestedRoutes = (
-    fastify: FastifyInstance,
-    config: RouteConfig,
-    nestedRoutePath: string,
-    dataFilePath: string
-) => {
-    registerRoutes(fastify, config.routes, nestedRoutePath, dataFilePath, config);
-};
-
 const simulateError = (request: any, reply: any): boolean => {
     const errorType = request.query.errorType;
     if (errorType) {
