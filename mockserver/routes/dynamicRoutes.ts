@@ -3,47 +3,35 @@ import fs from 'fs';
 import path from 'path';
 import config from '../config/mockserver.config';
 import { RouteConfig } from "../config/types/interfaces";
+import {partition} from "../utils/partition";
 
 export const registerDynamicRoutes = (fastify: FastifyInstance) => {
     const dataDir = path.join(__dirname, config.dataDir);
-    const files = fs.readdirSync(dataDir);
+    const routeConfigs = Object.entries(config.routeConfig).map(([file, routeConfig]) => ({
+        file,
+        routeConfig
+    }));
 
-    // First, register all top-level routes
-    files.forEach((file) => {
-        if (path.extname(file) !== '.json') {
-            fastify.log.info(`Skipping non-JSON file: ${file}`);
-            return;
-        }
+    // Use the generic partition function to split into parent and nested routes
+    const [nestedRoutes, parentRoutes] = partition(routeConfigs, ({ routeConfig }) => routeConfig.parents.length > 0);
 
-        const routeName = path.basename(file, '.json');
-        const dataFilePath = path.join(dataDir, file);
-        const routeConfig = getRouteConfig(file);
-
-        // Register top-level routes
-        if (routeConfig.parents.length === 0) {
-            const routePath = `/${routeName}`;
-            if (!isRouteRegistered(fastify, routePath)) {
-                registerRoutes(fastify, routeConfig.routes, routePath, dataFilePath, routeConfig);
-            }
+    // Register parent routes
+    parentRoutes.forEach(({ file, routeConfig }) => {
+        const routeName = file.replace('.json', '');
+        const routePath = `/${routeName}`;
+        if (!isRouteRegistered(fastify, routePath)) {
+            const dataFilePath = path.join(dataDir, file);
+            registerRoutes(fastify, routeConfig.routes, routePath, dataFilePath, routeConfig);
         }
     });
 
-    // Then, register nested routes
-    files.forEach((file) => {
-        if (path.extname(file) !== '.json') {
-            return;
-        }
-
-        const routeName = path.basename(file, '.json');
+    // Register nested routes
+    nestedRoutes.forEach(({ file, routeConfig }) => {
+        const routeName = file.replace('.json', '');
+        const nestedRoutePath = generateNestedRoutePath(routeConfig.parents, routeName, routeConfig.customParentKeys);
         const dataFilePath = path.join(dataDir, file);
-        const routeConfig = getRouteConfig(file);
-
-        // Register nested routes
-        if (routeConfig.parents.length > 0) {
-            const nestedRoutePath = generateNestedRoutePath(routeConfig.parents, routeName, routeConfig.customParentKeys);
-            if (!isRouteRegistered(fastify, nestedRoutePath)) {
-                registerNestedRoutes(fastify, routeConfig, nestedRoutePath, dataFilePath);
-            }
+        if (!isRouteRegistered(fastify, nestedRoutePath)) {
+            registerRoutes(fastify, routeConfig.routes, nestedRoutePath, dataFilePath, routeConfig);
         }
     });
 

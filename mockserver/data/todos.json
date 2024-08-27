@@ -10,8 +10,7 @@
     "completed": true
   },
   {
-    "title": "Improvement",
-    "completed": false,
-    "id": 3
+    "id": 3,
+    "completed": false
   }
 ]
