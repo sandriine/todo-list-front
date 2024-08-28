@@ -1,17 +1,20 @@
 [
   {
     "id": 1,
-    "title": "Buy groceries",
-    "completed": false
+    "name": "Smartphone",
+    "price": 699.99,
+    "description": "Latest model with advanced features"
   },
   {
-    "id": "2",
-    "title": "Take deep breath",
-    "completed": true
+    "id": 2,
+    "name": "Refrigerator",
+    "price": 499.99,
+    "description": "Energy-efficient fridge with ample space"
   },
   {
     "id": 3,
-    "title": "Improvement",
-    "completed": false
+    "name": "Laptop",
+    "price": 999.99,
+    "description": "High-performance laptop for professionals"
   }
 ]

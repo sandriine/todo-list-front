@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "todosId": 1,
+    "name": "Write introduction section",
+    "completed": false
+  },
+  {
+    "id": 2,
+    "todosId": 1,
+    "name": "Draft project timeline",
+    "completed": false
+  },
+  {
+    "id": 3,
+    "todosId": 2,
+    "name": "Identify major bugs",
+    "completed": true
+  }
+]

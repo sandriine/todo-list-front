@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "productId": 1,
+    "name": "Electronics",
+    "description": "Devices and gadgets"
+  },
+  {
+    "id": 2,
+    "productId": 1,
+    "name": "Appliances",
+    "description": "Home and kitchen appliances"
+  },
+  {
+    "id": 3,
+    "productId": 2,
+    "name": "Books",
+    "description": "Fiction and non-fiction books"
+  }
+]

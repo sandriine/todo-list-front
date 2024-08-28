@@ -1,7 +1,12 @@
 [
   {
-    "title": "Improvement",
-    "completed": false,
-    "id": 3
+    "id": 1,
+    "name": "Sample entry",
+    "description": "This is a placeholder entry"
+  },
+  {
+    "id": 2,
+    "name": "Another entry",
+    "description": "Another placeholder entry"
   }
 ]
