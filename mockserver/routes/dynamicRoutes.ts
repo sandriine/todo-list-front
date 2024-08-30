@@ -1,8 +1,8 @@
-import { FastifyInstance } from 'fastify';
+import {FastifyInstance} from 'fastify';
 import fs from 'fs';
 import path from 'path';
 import config from '../config/mockserver.config';
-import { RouteConfig } from "../config/types/interfaces";
+import {RouteConfig} from "../config/types/interfaces";
 import {partition} from "../utils/partition";
 import {generateSwaggerSchema} from "../utils/swagger-schema";
 
@@ -61,19 +61,15 @@ const registerRoutes = (fastify: FastifyInstance, routes: string[], routePath: s
                 // Handle general GET requests (e.g., /todos/:todoId/items)
                 fastify.get(routePath, { schema: generalSchema }, async (request, reply) => {
                     if (simulateError(request, reply)) return;
-                    const data = readDataFromFile(dataFilePath);
-
                     // Filter by parent ID if needed
-                    let filteredData = data;
+                    let filteredData = readDataFromFile(dataFilePath);
                     if (config.parents && config.parents.length > 0) {
                         config.parents.forEach(parent => {
                             const parentIdKey = config.customParentKeys[parent] || `${parent}Id`;
-                            console.log(parentIdKey);
                             // @ts-ignore
                             if (request.params[parentIdKey]) {
                                 // @ts-ignore
                                 filteredData = filteredData.filter(item => String(item[parentIdKey]) === String(request.params[parentIdKey]));
-                                console.log(filteredData);
                             }
                         });
                     }
