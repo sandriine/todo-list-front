@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "name": "Smartphone",
+    "price": 699.99,
+    "description": "Latest model with advanced features"
+  },
+  {
+    "id": 2,
+    "name": "Refrigerator",
+    "price": 499.99,
+    "description": "Energy-efficient fridge with ample space"
+  },
+  {
+    "id": 3,
+    "name": "Laptop",
+    "price": 999.99,
+    "description": "High-performance laptop for professionals"
+  }
+]
