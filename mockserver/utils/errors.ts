@@ -27,3 +27,23 @@ export class InternalServerError extends Error {
         this.statusCode = 500;
     }
 }
+
+export class UnauthorizedError extends Error {
+    public statusCode: number;
+
+    constructor(message: string) {
+        super(message);
+        this.name = 'UnauthorizedError';
+        this.statusCode = 401;
+    }
+}
+
+export class ForbiddenError extends Error {
+    public statusCode: number;
+
+    constructor(message: string) {
+        super(message);
+        this.name = 'ForbiddenError';
+        this.statusCode = 403;
+    }
+}
