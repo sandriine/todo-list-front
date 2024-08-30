@@ -6,8 +6,14 @@ import fastifySwagger from "@fastify/swagger";
 export const createServer = () => {
     const fastify = Fastify({ logger: true });
 
+    // Add any Fastify plugins or custom settings here, like CORS or static file serving
+    fastify.register(cors, {
+        origin: '*',
+    });
+
     fastify.register(fastifySwagger, {
         openapi: {
+            openapi: '3.1.0',
             info: {
                 title: 'Mock Server API',
                 description: 'API documentation for dynamically generated routes',
@@ -19,15 +25,10 @@ export const createServer = () => {
     fastify.register(fastifySwaggerUi, {
         routePrefix: '/docs',
         uiConfig: {
-            docExpansion: 'full',
+            docExpansion: 'list',
             deepLinking: false
         }
     });
-
-    // Add any Fastify plugins or custom settings here, like CORS or static file serving
-    fastify.register(cors, {
-        origin: '*',
-    })
 
     return fastify;
 };

@@ -4,6 +4,7 @@ import path from 'path';
 import config from '../config/mockserver.config';
 import { RouteConfig } from "../config/types/interfaces";
 import {partition} from "../utils/partition";
+import {generateSwaggerSchema} from "../utils/swagger-schema";
 
 export const registerDynamicRoutes = (fastify: FastifyInstance) => {
     const dataDir = path.join(__dirname, config.dataDir);
@@ -53,9 +54,10 @@ const generateNestedRoutePath = (parents: string[], routeName: string, customPar
 
 const registerRoutes = (fastify: FastifyInstance, routes: string[], routePath: string, dataFilePath: string, config: RouteConfig) => {
     routes.forEach(route => {
+        const { general: generalSchema, specific: specificSchema } = generateSwaggerSchema(route, routePath, path.parse(dataFilePath).name, config.hasSpecificRoute);
         switch (route) {
             case 'GET':
-                fastify.get(routePath, async (request, reply) => {
+                fastify.get(routePath, { schema: generalSchema },async (request, reply) => {
                     if (simulateError(request, reply)) return;
                     const data = readDataFromFile(dataFilePath);
                     const filteredData = filterDataByQueryParams(data, request.query);
@@ -65,7 +67,7 @@ const registerRoutes = (fastify: FastifyInstance, routes: string[], routePath: s
 
                 if (config.hasSpecificRoute) {
                     const specificPath = `${routePath}/:id`;
-                    fastify.get(specificPath, async (request, reply) => {
+                    fastify.get(specificPath, { schema: specificSchema },async (request, reply) => {
                         if (simulateError(request, reply)) return;
                         const data = readDataFromFile(dataFilePath);
                         // @ts-ignore
@@ -77,7 +79,7 @@ const registerRoutes = (fastify: FastifyInstance, routes: string[], routePath: s
                 break;
 
             case 'POST':
-                fastify.post(routePath, async (request, reply) => {
+                fastify.post(routePath, { schema: generalSchema },async (request, reply) => {
                     if (simulateError(request, reply)) return;
                     const data = readDataFromFile(dataFilePath);
                     const newItem = request.body;
@@ -90,7 +92,7 @@ const registerRoutes = (fastify: FastifyInstance, routes: string[], routePath: s
                 fastify.log.info(`Registered POST route: ${routePath}`);
                 break;
             case 'PUT':
-                fastify.put(`${routePath}/:id`, async (request, reply) => {
+                fastify.put(`${routePath}/:id`, { schema: specificSchema },async (request, reply) => {
                     if (simulateError(request, reply)) return;
                     const data = readDataFromFile(dataFilePath);
                     // @ts-ignore
@@ -110,7 +112,7 @@ const registerRoutes = (fastify: FastifyInstance, routes: string[], routePath: s
                 break;
 
             case 'PATCH':
-                fastify.patch(`${routePath}/:id`, async (request, reply) => {
+                fastify.patch(`${routePath}/:id`, { schema: specificSchema },async (request, reply) => {
                     if (simulateError(request, reply)) return;
                     const data = readDataFromFile(dataFilePath);
                     // @ts-ignore
@@ -130,7 +132,7 @@ const registerRoutes = (fastify: FastifyInstance, routes: string[], routePath: s
                 break;
 
             case 'DELETE':
-                fastify.delete(`${routePath}/:id`, async (request, reply) => {
+                fastify.delete(`${routePath}/:id`, { schema: specificSchema },async (request, reply) => {
                     if (simulateError(request, reply)) return;
                     const data = readDataFromFile(dataFilePath);
                     // @ts-ignore
