@@ -1,5 +1,7 @@
-import { Table } from 'antd';
+import { List } from 'antd';
 import { useQuery } from '@tanstack/react-query';
+import {Items} from "./Items.tsx";
+import {useState} from "react";
 
 
 export interface TodoList {
@@ -13,18 +15,8 @@ export function TodoLists() {
     queryFn: fetchTodoList,
   });
 
-  const columns = [
-    {
-      title: 'ID',
-      dataIndex: 'id',
-      key: 'id',
-    },
-    {
-      title: 'Title',
-      dataIndex: 'title',
-      key: 'title',
-    },
-  ];
+  const [todoListId, setTodoListId] = useState('');
+
 
   if (isPending) {
     return <span>Loading...</span>
@@ -34,7 +26,7 @@ export function TodoLists() {
     return <span>Error: { error.message }</span>
   }
 
-  function mapToDataSource() {
+  function mapToDataSource() : TodoList[] {
     return data.map((item: TodoList) => (
       {
         ...item, key: item.id
@@ -42,10 +34,23 @@ export function TodoLists() {
     ));
   }
 
+  function displayItems(id: string)  {
+    setTodoListId(id);
+  }
+
   return (
     <div>
       <h1>TodoList</h1>
-      <Table dataSource={ mapToDataSource() } columns={ columns }/>
+      <List
+          bordered
+          dataSource={mapToDataSource()}
+          renderItem={(todo: TodoList) => (
+              <List.Item onClick={() => displayItems(todo.id)}>
+                <List.Item.Meta title={ todo.title }/>
+              </List.Item>
+          )}
+      />
+      {todoListId !== '' ? <Items todo_list_id={todoListId} /> : null}
     </div>
   )
 }

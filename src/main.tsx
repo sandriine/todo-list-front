@@ -8,8 +8,8 @@ export function Main() {
   return (
     <>
       <QueryClientProvider client={queryClient}>
-      <TodoLists />
-        </QueryClientProvider>
+        <TodoLists />
+      </QueryClientProvider>
     </>
   );
 }

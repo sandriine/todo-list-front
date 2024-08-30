@@ -1,20 +1,20 @@
 [
   {
     "id": 1,
-    "todosId": 1,
-    "name": "Write introduction section",
-    "completed": false
+    "todo_list_id": 1,
+    "content": "Write introduction section",
+    "checked": false
   },
   {
     "id": 2,
-    "todosId": 1,
-    "name": "Draft project timeline",
-    "completed": false
+    "todo_list_id": 1,
+    "content": "Draft project timeline",
+    "checked": false
   },
   {
     "id": 3,
-    "todosId": 2,
-    "name": "Identify major bugs",
-    "completed": true
+    "todo_list_id": 2,
+    "content": "Identify major bugs",
+    "checked": true
   }
 ]
