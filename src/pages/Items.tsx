@@ -11,7 +11,7 @@ export interface Item {
 export function Items({todo_list_id}: {todo_list_id: string}) {
   const { isPending, isError, data, error } = useQuery({
     queryKey: ['items', todo_list_id],
-    queryFn: fetchItems,
+    queryFn: async () => { return await fetchItems(todo_list_id) },
   });
 
   if (isPending) {
@@ -38,7 +38,7 @@ export function Items({todo_list_id}: {todo_list_id: string}) {
   )
 }
 
-const fetchItems = async (id: any) => {
+const fetchItems = async (id: string) : Promise<Item[]> => {
     const response = await fetch(`http://localhost:3000/todos/${id}/items`)
     if (!response.ok) {
         throw new Error('Network response was not ok')

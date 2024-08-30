@@ -55,23 +55,43 @@ const generateNestedRoutePath = (parents: string[], routeName: string, customPar
 const registerRoutes = (fastify: FastifyInstance, routes: string[], routePath: string, dataFilePath: string, config: RouteConfig) => {
     routes.forEach(route => {
         const { general: generalSchema, specific: specificSchema } = generateSwaggerSchema(route, routePath, path.parse(dataFilePath).name, config.hasSpecificRoute);
+
         switch (route) {
             case 'GET':
-                fastify.get(routePath, { schema: generalSchema },async (request, reply) => {
+                // Handle general GET requests (e.g., /todos/:todoId/items)
+                fastify.get(routePath, { schema: generalSchema }, async (request, reply) => {
                     if (simulateError(request, reply)) return;
                     const data = readDataFromFile(dataFilePath);
-                    const filteredData = filterDataByQueryParams(data, request.query);
-                    reply.status(200).send(filteredData);
+
+                    // Filter by parent ID if needed
+                    let filteredData = data;
+                    if (config.parents && config.parents.length > 0) {
+                        config.parents.forEach(parent => {
+                            const parentIdKey = config.customParentKeys[parent] || `${parent}Id`;
+                            console.log(parentIdKey);
+                            // @ts-ignore
+                            if (request.params[parentIdKey]) {
+                                // @ts-ignore
+                                filteredData = filteredData.filter(item => String(item[parentIdKey]) === String(request.params[parentIdKey]));
+                                console.log(filteredData);
+                            }
+                        });
+                    }
+
+                    // Apply additional query filters if provided
+                    const finalFilteredData = filterDataByQueryParams(filteredData, request.query);
+                    reply.status(200).send(finalFilteredData);
                 });
                 fastify.log.info(`Registered GET route: ${routePath}`);
 
                 if (config.hasSpecificRoute) {
+                    // Handle specific GET requests (e.g., /todos/:todoId/items/:id)
                     const specificPath = `${routePath}/:id`;
-                    fastify.get(specificPath, { schema: specificSchema },async (request, reply) => {
+                    fastify.get(specificPath, { schema: specificSchema }, async (request, reply) => {
                         if (simulateError(request, reply)) return;
                         const data = readDataFromFile(dataFilePath);
                         // @ts-ignore
-                        const item = findItemById(data, request.params.id);
+                        const item = findItemById(data, request.params, config);
                         reply.status(item ? 200 : 404).send(item || { error: 'Item not found' });
                     });
                     fastify.log.info(`Registered GET route: ${specificPath}`);
@@ -79,7 +99,7 @@ const registerRoutes = (fastify: FastifyInstance, routes: string[], routePath: s
                 break;
 
             case 'POST':
-                fastify.post(routePath, { schema: generalSchema },async (request, reply) => {
+                fastify.post(routePath, { schema: generalSchema }, async (request, reply) => {
                     if (simulateError(request, reply)) return;
                     const data = readDataFromFile(dataFilePath);
                     const newItem = request.body;
@@ -91,17 +111,17 @@ const registerRoutes = (fastify: FastifyInstance, routes: string[], routePath: s
                 });
                 fastify.log.info(`Registered POST route: ${routePath}`);
                 break;
+
             case 'PUT':
-                fastify.put(`${routePath}/:id`, { schema: specificSchema },async (request, reply) => {
+                fastify.put(`${routePath}/:id`, { schema: specificSchema }, async (request, reply) => {
                     if (simulateError(request, reply)) return;
                     const data = readDataFromFile(dataFilePath);
                     // @ts-ignore
-                    const itemIndex = data.findIndex((item: any) => item.id == request.params.id);
+                    const itemIndex = data.findIndex((item: any) => findItemById([item], request.params, config));
                     if (itemIndex === -1) {
                         reply.status(404).send({ error: 'Item not found' });
                         return;
                     }
-                    // Replace the entire item with the new data
                     // @ts-ignore
                     const updatedItem = { id: data[itemIndex].id, ...request.body };
                     data[itemIndex] = updatedItem;
@@ -112,16 +132,15 @@ const registerRoutes = (fastify: FastifyInstance, routes: string[], routePath: s
                 break;
 
             case 'PATCH':
-                fastify.patch(`${routePath}/:id`, { schema: specificSchema },async (request, reply) => {
+                fastify.patch(`${routePath}/:id`, { schema: specificSchema }, async (request, reply) => {
                     if (simulateError(request, reply)) return;
                     const data = readDataFromFile(dataFilePath);
                     // @ts-ignore
-                    const itemIndex = data.findIndex((item: any) => item.id == request.params.id);
+                    const itemIndex = data.findIndex((item: any) => findItemById([item], request.params, config));
                     if (itemIndex === -1) {
                         reply.status(404).send({ error: 'Item not found' });
                         return;
                     }
-                    // Update only specific fields
                     // @ts-ignore
                     const updatedItem = { ...data[itemIndex], ...request.body };
                     data[itemIndex] = updatedItem;
@@ -132,16 +151,15 @@ const registerRoutes = (fastify: FastifyInstance, routes: string[], routePath: s
                 break;
 
             case 'DELETE':
-                fastify.delete(`${routePath}/:id`, { schema: specificSchema },async (request, reply) => {
+                fastify.delete(`${routePath}/:id`, { schema: specificSchema }, async (request, reply) => {
                     if (simulateError(request, reply)) return;
                     const data = readDataFromFile(dataFilePath);
                     // @ts-ignore
-                    const itemIndex = data.findIndex((item: any) => item.id == request.params.id);
+                    const itemIndex = data.findIndex((item: any) => findItemById([item], request.params, config));
                     if (itemIndex === -1) {
                         reply.status(404).send({ error: 'Item not found' });
                         return;
                     }
-                    // Remove the item from the data array
                     data.splice(itemIndex, 1);
                     fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2));
                     reply.status(204).send();
@@ -151,6 +169,7 @@ const registerRoutes = (fastify: FastifyInstance, routes: string[], routePath: s
         }
     });
 };
+
 const simulateError = (request: any, reply: any): boolean => {
     const errorType = request.query.errorType;
     if (errorType) {
@@ -186,6 +205,19 @@ const filterDataByQueryParams = (data: any[], queryParams: any) => {
     });
 };
 
-const findItemById = (data: any[], id: string) => {
-    return data.find((item: any) => String(item.id) === String(id));
+const findItemById = (data: any[], params: { [key: string]: string }, config: RouteConfig) => {
+    let filteredData = data;
+
+    // Filter based on parent IDs if the route has parents
+    if (config.parents && config.parents.length > 0) {
+        config.parents.forEach(parent => {
+            const parentIdKey = config.customParentKeys[parent] || `${parent}Id`;
+            if (params[parentIdKey]) {
+                filteredData = filteredData.filter(item => String(item[parentIdKey]) === String(params[parentIdKey]));
+            }
+        });
+    }
+
+    // Find the specific item by its own ID
+    return filteredData.find(item => String(item.id) === String(params.id));
 };

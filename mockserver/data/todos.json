@@ -1,17 +1,16 @@
 [
   {
     "id": 1,
-    "title": "Buy groceries",
-    "completed": false
+    "title": "Buy groceries"
   },
   {
-    "id": "2",
+    "id": 2,
     "title": "Take deep breath",
     "completed": true
   },
   {
+    "id": 3,
     "title": "Improvement",
-    "completed": false,
-    "id": 3
+    "completed": false
   }
 ]
