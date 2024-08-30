@@ -33,9 +33,9 @@ mockserver/
 ├── api/                # API controllers for handling HTTP requests
 ├── config/             # Configuration files and types
 ├── data/               # JSON files used as mock data
-├── routes/             # Dynamic route registration logic
 ├── plugins/            # Custom Fastify plugins
 │   └── configureRoutesPlugin.ts  # Plugin for configuring routes dynamically
+├── routes/             # Dynamic route registration logic
 ├── utils/              # Utility functions and error handling
 ├── index.ts            # Main entry point for the server
 └── tsconfig.json       # TypeScript configuration
@@ -58,8 +58,8 @@ The `mockserver.config.ts` file is crucial for controlling how the mock server b
   ```typescript
   'todos.json': {
       routes: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'], // Enable all methods
-      parent: null,
-      parentKey: null,
+      parent: [],
+      parentKey: {},
       hasSpecificRoute: true
   }
   ```
@@ -69,10 +69,10 @@ The `mockserver.config.ts` file is crucial for controlling how the mock server b
 
 - **Example**: 
   ```typescript
-  'todo_items.json': {
+  'items.json': {
       routes: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-      parent: 'todos', // Indicates that this resource is nested under the 'todos' resource
-      parentKey: 'todoId',
+      parent: ['todos'], // Indicates that this resource is nested under the 'todos' resource
+      parentKey: {'todos':'todoId'},
       hasSpecificRoute: true
   }
   ```
@@ -82,10 +82,10 @@ The `mockserver.config.ts` file is crucial for controlling how the mock server b
 
 - **Example**: 
   ```typescript
-  'todo_items.json': {
+  'items.json': {
       routes: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
       parent: 'todos',
-      parentKey: 'todoId', // Indicates the key used to link items to their parent todo
+      parentKey: {'todos':'todoId'}, // Indicates the key used to link items to their parent todo
       hasSpecificRoute: true
   }
   ```
@@ -97,8 +97,8 @@ The `mockserver.config.ts` file is crucial for controlling how the mock server b
   ```typescript
   'todos.json': {
       routes: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-      parent: null,
-      parentKey: null,
+      parent: [],
+      parentKey: {},
       hasSpecificRoute: true // Enables /todos/:id
   }
   ```
@@ -112,14 +112,14 @@ export default {
     routeConfig: {
         'todos.json': {
             routes: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-            parent: null,
-            parentKey: null,
+            parent: [],
+            parentKey: {},
             hasSpecificRoute: true // Enables /todos/:id
         },
-        'todo_items.json': {
+        'items.json': {
             routes: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-            parent: 'todos',
-            parentKey: 'todoId',
+            parent: ['todos'],
+            parentKey: {'todos':'todoId'},
             hasSpecificRoute: true // Enables /todos/:todoId/items/:id
         }
     }
