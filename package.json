@@ -6,7 +6,9 @@
     "start": "farm start",
     "build": "farm build",
     "preview": "farm preview",
-    "clean": "farm clean"
+    "clean": "farm clean",
+    "bench": "concurrently \"npm run start\" \"npm run start:mockserver\"",
+    "start:mockserver": "nodemon --watch mockserver --exec \"ts-node mockserver/index.ts\""
   },
   "dependencies": {
     "@fastify/cors": "^9.0.1",
@@ -27,7 +29,9 @@
     "@types/node": "^22.5.0",
     "@types/react": "18",
     "@types/react-dom": "18",
+    "concurrently": "^8.2.2",
     "core-js": "^3.36.1",
+    "nodemon": "^3.1.4",
     "react-refresh": "^0.14.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.4"
